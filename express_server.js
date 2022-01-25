@@ -3,6 +3,8 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const { acceptsLanguages } = require("express/lib/request");
+const cookieParser = require('cookie-parser')
+
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -23,7 +25,7 @@ charactersLength));
 }
 
 app.use(bodyParser.urlencoded({extended: true}));
-
+app.use(cookieParser())
 
 app.set("view engine", "ejs");
 
@@ -31,8 +33,18 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+app.post("/login",(req,res)=>{
+  res.cookie("username",req.body.username);
+  res.redirect("/urls");
+})
+
+app.post("/logout",(req,res)=>{
+  res.clearCookie("username");
+  res.redirect("/urls");
+})
+
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase,username: req.cookies["username"], };
   res.render("urls_index", templateVars);
 });
 
