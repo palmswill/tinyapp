@@ -25,29 +25,42 @@ function generateRandomString() {
   return result;
 }
 
-
-const getUserFromCookies =(req,res,next)=>{
-  req.user_id=req.session.user_id;
+const getUserFromCookies = (req, res, next) => {
+  req.user_id = req.session.user_id;
   next();
-}
+};
 
-const setUserIdToCookies=(req,userId)=>{
-  req.session.user_id=userId;
+const setUserIdToCookies = (req, userId) => {
+  req.session.user_id = userId;
+};
 
-}
-
-const removeUserFromCookies=(req)=>{
-  req.session.user_id=null;
-}
-
+const removeUserFromCookies = (req) => {
+  req.session.user_id = null;
+};
 
 /**
- * check if user exists in the user object;
+ * get user by email (for helper function session)
+ * @param {*} email
+ * @param {*} database
+ * @returns user object
+ */
+const getUserByEmail = function (email, database) {
+  // lookup magic...
+  const userList = Object.values(database).filter(
+    (user) => email === user.email
+  );
+  const user = userList.length ? userList[0] : false;
+  return user;
+};
+
+/**
+ * check if user exists with email in the user object;
  * @param {*} email email to match
  * @returns number of value that matches the email in the users object;
  */
-const userExist = (email) => {
-  return Object.values(users).filter((user) => email === user.email).length;
+const userExist = (email, db) => {
+  const targetDb = db ? db : users;
+  return Object.values(targetDb).filter((user) => email === user.email).length;
 };
 
 /**
@@ -58,17 +71,14 @@ const userExist = (email) => {
  * @returns return userId if one of user has matching email and password, else return false;
  */
 const authenticateUser = (email, password) => {
-  
   let userId;
-  Object.values(users).forEach((user)=>{
-    if (user.email === email && 
-      bcrypt.compareSync(password, user.password)){
-        userId = user.id;
-      }
-  })
+  Object.values(users).forEach((user) => {
+    if (user.email === email && bcrypt.compareSync(password, user.password)) {
+      userId = user.id;
+    }
+  });
   return userId || false;
 };
-
 
 /**
  * create user with random id and provided info if it does not exist in the users object
@@ -92,4 +102,13 @@ const createUser = (email, password) => {
   return userId;
 };
 
-module.exports = { users, authenticateUser, createUser,getUserFromCookies,setUserIdToCookies,removeUserFromCookies };
+module.exports = {
+  users,
+  userExist,
+  authenticateUser,
+  createUser,
+  getUserFromCookies,
+  setUserIdToCookies,
+  removeUserFromCookies,
+  getUserByEmail
+};
