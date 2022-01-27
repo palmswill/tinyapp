@@ -17,9 +17,8 @@ const {
 
 // bycrpt
 const bcrypt = require("bcryptjs");
-const password = "purple-monkey-dinosaur"; // found in the req.params object
-const hashedPassword = bcrypt.hashSync(password, 10);
 
+// error messages for error page;
 const error = {
   siginError: "You are not Logged In, Please register or Sign in",
   credentialError: "Invalid credential",
@@ -28,6 +27,8 @@ const error = {
 };
 
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// cookiesession
 app.use(cookieSession({
   name: 'session',
   keys: ["12345"],
@@ -35,6 +36,8 @@ app.use(cookieSession({
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }))
+
+// setting session to req.user_id;
 app.use(getUserFromCookies);
 
 app.set("view engine", "ejs");
@@ -54,7 +57,9 @@ app.get("/login", (req, res) => {
 // login
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
+  // get id 
   let authenticatedId = authenticateUser(email, password);
+  // if there is id , set id to session;
   if (authenticatedId) {
     setUserIdToCookies(req,authenticatedId);
     res.redirect("/urls");
@@ -68,6 +73,7 @@ app.post("/login", (req, res) => {
 
 // logout
 app.post("/logout", (req, res) => {
+  // remove id from session;
   removeUserFromCookies(req);
   res.redirect("/urls");
 });
@@ -113,6 +119,7 @@ app.get("/urls", (req, res) => {
 // create shortenUrl
 app.post("/urls", (req, res) => {
   const user_id = req.user_id;
+  // user logged in, continue to create short url
   if (user_id ) {
     createUrl(req.body.longURL,user_id);
     res.redirect("/urls");
@@ -141,8 +148,10 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+
 app.get("/urls/:shortURL", (req, res) => {
   const user_id = req.user_id;
+  // if url belongs to id, show
   if (matchShortUrlwithId(req.params.shortURL, user_id)) {
     const templateVars = {
       shortURL: req.params.shortURL,
@@ -151,11 +160,13 @@ app.get("/urls/:shortURL", (req, res) => {
     };
 
     res.render("urls_show", templateVars);
+    // if not logged in, show login error
   } else if (!user_id) {
     res.render("error", {
       errorMessage: error.siginError,
       user: undefined,
     });
+    // if logged in , show wrong id error
   } else if (!matchShortUrlwithId(req.params.shortURL, user_id)) {
     res.render("error", {
       errorMessage: error.notBelongError,
@@ -163,9 +174,11 @@ app.get("/urls/:shortURL", (req, res) => {
     });
   }
 });
+// delete short url
 app.post("/urls/:shortURL/delete", (req, res) => {
   const user_id = req.user_id;
 
+  // only delete if it matches user id
   if (urlDatabase[req.params.shortURL].userID === user_id) {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
@@ -177,13 +190,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 });
 
+// create url
 app.post("/urls/:shortURL", (req, res) => {
   const user_id = req.user_id;
+  // only create if user_id match the id
   if (urlDatabase[req.params.shortURL].userID === user_id) {
-    urlDatabase[req.params.shortURL] = {
-      longURL: `https://${req.body.longURL}`,
-      userID: user_id,
-    };
+    createUrl(longURL,user_id);
     res.redirect("/urls");
   } else if (!user_id) {
     res.render("error", {

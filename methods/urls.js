@@ -24,7 +24,7 @@ function generateRandomString() {
 const createUrl = (longURL, userID) => {
   let shortUrl = generateRandomString();
   let url = {
-    longURL: longURL,
+    longURL: `https://${longURL}`,
     userID: userID,
   };
   urlDatabase[shortUrl] = url;

@@ -25,15 +25,30 @@ function generateRandomString() {
   return result;
 }
 
+/**
+ * middleware to put session user_id to req.user_id;
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
 const getUserFromCookies = (req, res, next) => {
   req.user_id = req.session.user_id;
   next();
 };
 
+/**
+ * set usrId to req.user_id
+ * @param {*} req 
+ * @param {*} userId 
+ */
 const setUserIdToCookies = (req, userId) => {
   req.session.user_id = userId;
 };
 
+/**
+ * remove user_id from session
+ * @param {*} req 
+ */
 const removeUserFromCookies = (req) => {
   req.session.user_id = null;
 };
