@@ -24,12 +24,28 @@ function generateRandomString() {
 const createUrl = (longURL, userID) => {
   let shortUrl = generateRandomString();
   let url = {
-    longURL: `https://${longURL}`,
+    longURL: longURL,
     userID: userID,
   };
   urlDatabase[shortUrl] = url;
   return shortUrl;
 };
+
+/**
+ * create url shortener record in database 
+ * @param {*} longURL long url link to convert to short url,
+ * @param {*} userID 
+ * @return shortUrl
+ */
+ const updateUrl = (shortURL,longURL, userID) => {
+  let url = {
+    longURL: longURL,
+    userID: userID,
+  };
+  urlDatabase[shortURL] = url;
+  return shortURL;
+};
+
 
 /**
  *  return filetered urldb by user Id input
@@ -59,4 +75,4 @@ const matchShortUrlwithId = (shortUrl, id) => {
   return false;
 };
 
-module.exports = {createUrl,matchShortUrlwithId, filterUrlDbById, urlDatabase };
+module.exports = {createUrl,matchShortUrlwithId, filterUrlDbById, urlDatabase,updateUrl };

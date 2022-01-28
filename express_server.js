@@ -13,6 +13,7 @@ const {
   filterUrlDbById,
   urlDatabase,
   createUrl,
+  updateUrl
 } = require("./methods/urls");
 
 // bycrpt
@@ -190,12 +191,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 });
 
-// create url
+// update url
 app.post("/urls/:shortURL", (req, res) => {
   const user_id = req.user_id;
   // only create if user_id match the id
   if (urlDatabase[req.params.shortURL].userID === user_id) {
-    createUrl(longURL,user_id);
+    updateUrl(req.params.shortURL,req.body.longURL,user_id);
     res.redirect("/urls");
   } else if (!user_id) {
     res.render("error", {

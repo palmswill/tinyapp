@@ -33,6 +33,7 @@ function generateRandomString() {
  */
 const getUserFromCookies = (req, res, next) => {
   req.user_id = req.session.user_id;
+  console.log(req.user_id);
   next();
 };
 
